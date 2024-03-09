@@ -6,6 +6,8 @@
 #include "SUnrealObjectClass.h"
 #include "Examples/SFlyable.h"
 #include "Examples/SPigeon.h"
+#include "JsonObjectConverter.h"
+#include "UObject/SavePackage.h"
 
 USGameInstance::USGameInstance()
 {
@@ -89,6 +91,34 @@ void USGameInstance::Init()
     Pigeon77->Serialize(MemoryReaderAr);
     UE_LOG(LogTemp, Log, TEXT("[Pigeon77] Name: %s, ID: %d"), *Pigeon77->GetName(), Pigeon77->GetID());
 
+
+    const FString JsonDataFileName(TEXT("StudyJsonFile.txt"));
+    FString AbsolutePathForJsonData = FPaths::Combine(*SavedDir, *JsonDataFileName);
+    FPaths::MakeStandardFilename(AbsolutePathForJsonData);
+
+    TSharedRef<FJsonObject> SrcJsonObject = MakeShared<FJsonObject>();
+    FJsonObjectConverter::UStructToJsonObject(SerializedPigeon->GetClass(), SerializedPigeon, SrcJsonObject);
+
+    FString JsonOutString;
+    TSharedRef<TJsonWriter<TCHAR>> JsonWriterAr = TJsonWriterFactory<TCHAR>::Create(&JsonOutString);
+    if (true == FJsonSerializer::Serialize(SrcJsonObject, JsonWriterAr))
+    {
+        FFileHelper::SaveStringToFile(JsonOutString, *AbsolutePathForJsonData);
+    }
+
+    FString JsonInString;
+    FFileHelper::LoadFileToString(JsonInString, *AbsolutePathForJsonData);
+    TSharedRef<TJsonReader<TCHAR>> JsonReaderAr = TJsonReaderFactory<TCHAR>::Create(JsonInString);
+
+    TSharedPtr<FJsonObject> DstJsonObject;
+    if (true == FJsonSerializer::Deserialize(JsonReaderAr, DstJsonObject))
+    {
+        USPigeon* Pigeon78 = NewObject<USPigeon>();
+        if (true == FJsonObjectConverter::JsonObjectToUStruct(DstJsonObject.ToSharedRef(), Pigeon78->GetClass(), Pigeon78))
+        {
+            UE_LOG(LogTemp, Log, TEXT("[Pigeon78] Name: %s, ID: %d"), *Pigeon78->GetName(), Pigeon78->GetID());
+        }
+    }
 }
 
 void USGameInstance::Shutdown()
