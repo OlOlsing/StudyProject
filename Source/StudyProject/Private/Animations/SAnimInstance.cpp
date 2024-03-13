@@ -17,6 +17,8 @@ void USAnimInstance::NativeInitializeAnimation()
     bIsFalling = false;
 
     bIsCrouching = false;
+
+    bIsDead = false;
 }
 
 void USAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -33,6 +35,7 @@ void USAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
             CurrentSpeed = Velocity.Size();
             bIsFalling = CharacterMovementComponent->IsFalling();
             bIsCrouching = CharacterMovementComponent->IsCrouching();
+            bIsDead = OwnerCharacter->IsDead();
         }
     }
 }
