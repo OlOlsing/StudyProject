@@ -16,6 +16,11 @@ public class StudyProject : ModuleRules
             "Json", "JsonUtilities",
 
             "EnhancedInput",
+
+            // AI
+            "NavigationSystem",
+            "AIModule",
+            "GameplayTasks"
              });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });
