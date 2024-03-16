@@ -55,6 +55,7 @@ private:
     UFUNCTION()
     void OnAssetLoaded();
 
+    void Menu(const FInputActionValue& InValue);
 private:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ASRPGCharacter", Meta = (AllowPrivateAccess))
     TObjectPtr<class USInputConfigData> PlayerCharacterInputConfigData;

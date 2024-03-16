@@ -7,6 +7,16 @@
 /**
  *
  */
+
+UENUM(BlueprintType)
+enum class ETeamType : uint8
+{
+    None,
+    Red,
+    Blue,
+    End
+};
+
 UCLASS()
 class STUDYPROJECT_API USPlayerStateSave : public USaveGame
 {
@@ -23,5 +33,8 @@ public:
 
     UPROPERTY()
     float CurrentEXP;
+
+    UPROPERTY()
+    ETeamType TeamType = ETeamType::Red;
 
 };

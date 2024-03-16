@@ -17,6 +17,7 @@
 #include "SPlayerCharacterSettings.h"
 #include "Game/SGameInstance.h"
 #include "Engine/StreamableManager.h"
+#include "Controllers/SPlayerController.h"
 
 ASRPGCharacter::ASRPGCharacter()
 	: bIsAttacking(false)
@@ -86,12 +87,24 @@ void ASRPGCharacter::BeginPlay()
 		}
 	}
 
-	const USPlayerCharacterSettings* CDO = GetDefault<USPlayerCharacterSettings>();
-	int32 RandIndex = FMath::RandRange(0, CDO->PlayerCharacterMeshPaths.Num() - 1);
-	CurrentPlayerCharacterMeshPath = CDO->PlayerCharacterMeshPaths[RandIndex];
+	//const USPlayerCharacterSettings* CDO = GetDefault<USPlayerCharacterSettings>();
+	//int32 RandIndex = FMath::RandRange(0, CDO->PlayerCharacterMeshPaths.Num() - 1);
+	//CurrentPlayerCharacterMeshPath = CDO->PlayerCharacterMeshPaths[RandIndex];
 
-	USGameInstance* SGI = Cast<USGameInstance>(GetGameInstance());
-	if (true == ::IsValid(SGI))
+	//USGameInstance* SGI = Cast<USGameInstance>(GetGameInstance());
+	//if (true == ::IsValid(SGI))
+	//{
+	//	AssetStreamableHandle = SGI->StreamableManager.RequestAsyncLoad(
+	//		CurrentPlayerCharacterMeshPath,
+	//		FStreamableDelegate::CreateUObject(this, &ThisClass::OnAssetLoaded)
+	//	);
+	//}
+
+	const USPlayerCharacterSettings* CDO = GetDefault<USPlayerCharacterSettings>();
+	int32 SelectedMeshIndex = static_cast<int32>(PS->GetCurrentTeamType()) - 1;
+	CurrentPlayerCharacterMeshPath = CDO->PlayerCharacterMeshPaths[SelectedMeshIndex];
+
+	if (USGameInstance* SGI = Cast<USGameInstance>(GetGameInstance()))
 	{
 		AssetStreamableHandle = SGI->StreamableManager.RequestAsyncLoad(
 			CurrentPlayerCharacterMeshPath,
@@ -117,7 +130,7 @@ void ASRPGCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(PlayerCharacterInputConfigData->LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
 		EnhancedInputComponent->BindAction(PlayerCharacterInputConfigData->JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(PlayerCharacterInputConfigData->AttackAction, ETriggerEvent::Started, this, &ThisClass::Attack);
-
+		EnhancedInputComponent->BindAction(PlayerCharacterInputConfigData->MenuAction, ETriggerEvent::Started, this, &ThisClass::Menu);
 	}
 }
 
@@ -294,5 +307,14 @@ void ASRPGCharacter::OnAssetLoaded()
 	if (true == LoadedAsset.IsValid())
 	{
 		GetMesh()->SetSkeletalMesh(LoadedAsset.Get());
+	}
+}
+
+void ASRPGCharacter::Menu(const FInputActionValue& InValue)
+{
+	ASPlayerController* PlayerController = GetController<ASPlayerController>();
+	if (true == ::IsValid(PlayerController))
+	{
+		PlayerController->ToggleMenu();
 	}
 }
